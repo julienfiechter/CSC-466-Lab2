@@ -2,10 +2,12 @@ import json
 import sys
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+
 
 def load_input_file(filename):
     meta = pd.read_csv(filename, nrows=3, header=None)
@@ -36,6 +38,23 @@ def confusion_matrix(y_true, y_pred):
         if predicted is not None:
             matrix.loc[actual, predicted] += 1
     return matrix
+
+def save_tree_visualization(X, y, threshold, output_file):
+    model = create_model(X, threshold)
+    model.fit(X, y)
+
+    clf = model.named_steps["classifier"]
+
+    plt.figure(figsize=(20, 10))
+    plot_tree(
+        clf,
+        filled=True,
+        rounded=True,
+        class_names=clf.classes_,
+        feature_names=None
+    )
+    plt.savefig(output_file, bbox_inches="tight")
+    plt.close()
 
 def create_model(X_train, threshold):
     categorical_cols = X_train.select_dtypes(include=["object", "string"]).columns.tolist()
@@ -80,10 +99,11 @@ def cross_validation(X, y, kfold, threshold):
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python3 crossValSKL.py <csv_file> <grid_file>")
+        print("Usage: python3 crossValSKL.py <csv_file> <grid_file> [<output_tree_image>]")
         return
     filename = sys.argv[1]
     grid_file = sys.argv[2]
+    output_tree = sys.argv[3] if len(sys.argv) > 3 else None
     X,y = load_input_file(filename)
     with open(grid_file, "r") as f:
         grid = json.load(f)
@@ -99,6 +119,9 @@ def main():
             best_accuracy = accur
             best_threshold = t
             best_confusion_matrix = confusion_mat
+
+    if output_tree:
+        save_tree_visualization(X, y, best_threshold, output_tree)
 
     print(f"Splitting Metric: InfoGain, Threshold: {best_threshold}")
     print(f"Accuracy: {best_accuracy:.5f}")
