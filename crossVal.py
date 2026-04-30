@@ -5,10 +5,16 @@ import pandas as pd
 from c45 import C45
 
 def load_input_file(filename):
-    df = pd.read_csv(filename)
-    label = df.columns[-1]
-    X = df.drop(columns=[label])
-    y = df[label]
+    meta = pd.read_csv(filename, nrows=3, header=None)
+
+    class_col = meta.iloc[2].dropna().values[0].strip()
+
+    df = pd.read_csv(filename, skiprows=[1, 2])
+    df.columns = df.columns.str.strip()
+
+    X = df.drop(columns=[class_col])
+    y = df[class_col]
+
     return X, y
 
 def folds(n, k = 10):
@@ -85,7 +91,7 @@ def main():
     if output_tree:
         metric = metric_map[best_params[0]]
         threshold = best_params[1]
-        model = C45(metric=metric, threshold=0.0)
+        model = C45(metric=metric, threshold=threshold)
         model.fit(X, y)
         model.save_tree(output_tree)
 

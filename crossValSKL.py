@@ -2,15 +2,19 @@ import json
 import sys
 import numpy as np
 import pandas as pd
+from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.tree import DecisionTreeClassifier
 
 def load_input_file(filename):
-    df = pd.read_csv(filename)
-    label = df.columns[-1]
-    X = df.drop(columns=[label])
-    y = df[label]
+    meta = pd.read_csv(filename, nrows=3, header=None)
+    class_col = meta.iloc[2].dropna().values[0].strip()
+    df = pd.read_csv(filename, skiprows=[1, 2])
+    df.columns = df.columns.str.strip()
+    X = df.drop(columns=[class_col])
+    y = df[class_col]
+
     return X, y
 
 def folds(n, k = 10):
@@ -33,18 +37,25 @@ def confusion_matrix(y_true, y_pred):
             matrix.loc[actual, predicted] += 1
     return matrix
 
-def create_model(threshold):
-   return Pipeline([
-       ("encoder", OrdinalEncoder(
-           handle_unknown="use_encoded_value", unknown_value=-1
-       )),
-       ("classifier", DecisionTreeClassifier(
-           criterion="entropy",
-           min_impurity_decrease= threshold
-       ))
-   ])
+def create_model(X_train, threshold):
+    categorical_cols = X_train.select_dtypes(include=["object"]).columns.tolist()
+    numeric_cols = X_train.select_dtypes(exclude=["object"]).columns.tolist()
 
-def cross_validation(X, y, kfold, threshold ):
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("cat", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1), categorical_cols),
+            ("num", "passthrough", numeric_cols),
+        ]
+    )
+    model = Pipeline([
+        ("preprocessor", preprocessor),
+        ("classifier", DecisionTreeClassifier(
+            criterion="entropy",
+            min_impurity_decrease=threshold))
+    ])
+    return model
+
+def cross_validation(X, y, kfold, threshold):
     all_predictions = []
     all_true_predictions = []
 
@@ -56,7 +67,7 @@ def cross_validation(X, y, kfold, threshold ):
         X_test = X.iloc[test]
         y_test = y.iloc[test]
 
-        model = create_model(threshold)
+        model = create_model(X_train, threshold)
         model.fit(X_train, y_train)
         predictions = model.predict(X_test)
         all_predictions.extend(predictions)
