@@ -17,7 +17,7 @@ def load_input_file(filename):
 
     return X, y
 
-def folds(n, k = 10):
+def folds(n, k = 10, seed=1):
     indices = np.arange(n)
     np.random.shuffle(indices)
     return np.array_split(indices, k)
@@ -51,7 +51,8 @@ def create_model(X_train, threshold):
         ("preprocessor", preprocessor),
         ("classifier", DecisionTreeClassifier(
             criterion="entropy",
-            min_impurity_decrease=threshold))
+            min_impurity_decrease=threshold,
+            random_state=1))
     ])
     return model
 
@@ -87,7 +88,7 @@ def main():
     with open(grid_file, "r") as f:
         grid = json.load(f)
     thresholds = grid["InfoGain"]
-    kfold = folds(len(y), k=10)
+    kfold = folds(len(y), k=10, seed=1)
     best_accuracy = -1
     best_threshold = None
     best_confusion_matrix = None

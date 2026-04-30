@@ -17,8 +17,9 @@ def load_input_file(filename):
 
     return X, y
 
-def folds(n, k = 10):
+def folds(n, k = 10, seed=1):
     indices = np.arange(n)
+    np.random.seed(seed)
     np.random.shuffle(indices)
     return np.array_split(indices, k)
 
@@ -74,7 +75,7 @@ def main():
         "InfoGain": "info_gain",
         "Ratio": "gain_ratio"
     }
-    kfold = folds(len(y), k=10)
+    kfold = folds(len(y), k=10, seed=1)
     best_accuracy = -1
     best_params = None
     best_confusion_matrix = None
