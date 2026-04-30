@@ -38,8 +38,8 @@ def confusion_matrix(y_true, y_pred):
     return matrix
 
 def create_model(X_train, threshold):
-    categorical_cols = X_train.select_dtypes(include=["object"]).columns.tolist()
-    numeric_cols = X_train.select_dtypes(exclude=["object"]).columns.tolist()
+    categorical_cols = X_train.select_dtypes(include=["object", "string"]).columns.tolist()
+    numeric_cols = X_train.select_dtypes(exclude=["object", "string"]).columns.tolist()
 
     preprocessor = ColumnTransformer(
         transformers=[
