@@ -21,6 +21,7 @@ def load_input_file(filename):
 
 def folds(n, k = 10, seed=1):
     indices = np.arange(n)
+    np.random.seed(seed)
     np.random.shuffle(indices)
     return np.array_split(indices, k)
 
