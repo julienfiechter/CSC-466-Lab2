@@ -1,0 +1,13 @@
+Lab 2 Report - CSC 466
+Names: Julien Fiechter, Jaderian Rebosura
+Emails: jfiechte@calpoly.edu, jrebosur@calpoly.edu
+
+In order to run our cross-validation implementation, as well as the cross-validation Scikit-Learn implementation
+we used the following grid_file or grid.json to test and evaluate for the best split metric, threshold, and accuracies.
+
+
+grid.json:
+{
+  "InfoGain": [0.0, 0.01, 0.05, 0.1, 0.2, 0.5, 1.0],
+  "Ratio": [0.0, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0]
+}
