@@ -5,14 +5,21 @@ import pandas as pd
 from c45 import C45
 
 def load_input_file(filename):
-    df = pd.read_csv(filename)
-    label = df.columns[-1]
-    X = df.drop(columns=[label])
-    y = df[label]
+    meta = pd.read_csv(filename, nrows=3, header=None)
+
+    class_col = meta.iloc[2].dropna().values[0].strip()
+
+    df = pd.read_csv(filename, skiprows=[1, 2])
+    df.columns = df.columns.str.strip()
+
+    X = df.drop(columns=[class_col])
+    y = df[class_col]
+
     return X, y
 
-def folds(n, k = 10):
+def folds(n, k = 10, seed=1):
     indices = np.arange(n)
+    np.random.seed(seed)
     np.random.shuffle(indices)
     return np.array_split(indices, k)
 
@@ -68,7 +75,7 @@ def main():
         "InfoGain": "info_gain",
         "Ratio": "gain_ratio"
     }
-    kfold = folds(len(y), k=10)
+    kfold = folds(len(y), k=10, seed=1)
     best_accuracy = -1
     best_params = None
     best_confusion_matrix = None
@@ -85,7 +92,7 @@ def main():
     if output_tree:
         metric = metric_map[best_params[0]]
         threshold = best_params[1]
-        model = C45(metric=metric, threshold=0.0)
+        model = C45(metric=metric, threshold=threshold)
         model.fit(X, y)
         model.save_tree(output_tree)
 
