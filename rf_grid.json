@@ -1,7 +1,6 @@
-{
-  "threshold": [0.01, 0.05],
-  "split": ["Information Gain"],
-  "NumTrees": [50, 100],
-  "NumAttributes": [2, 3],
-  "PercentData": [0.25, 0.5]
+{ "threshold": [0.01, 0.05, 0.1],
+  "split": ["Information Gain", "Information Gain Ratio"],
+  "NumTrees": [5, 10, 20, 50],
+  "NumAttributes": [2,3,4],
+  "PercentData": [ 0.1, 0.25, 0.33]
 }
