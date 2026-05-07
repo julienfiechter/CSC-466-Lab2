@@ -280,7 +280,7 @@ def generate_report(
     )
 
     comparison.build()
-    comparison.to_pdf(output_file)
+    comparison.to_html(output_file)
 
 def main():
     if len(sys.argv) < 3:
