@@ -1,0 +1,7 @@
+{
+  "threshold": [0.01, 0.05],
+  "split": ["Information Gain"],
+  "NumTrees": [50, 100],
+  "NumAttributes": [2, 3],
+  "PercentData": [0.25, 0.5]
+}
